@@ -3,14 +3,18 @@
  */
 package com.nuance.chatbot.utils;
 
+import static org.apache.commons.lang.StringUtils.substringBetween;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nuance.chatbot.databeans.ChatbotRequestBean;
-import com.nuance.chatbot.databeans.ChatbotResponseBean;
 
 /**
  * @author praveen.rawat
@@ -25,33 +29,44 @@ public class AppUtils {
 	 * 
 	 * @return
 	 */
-	public static ChatbotResponseBean getPerlOutput(ChatbotRequestBean requestBean) {
+	public static String getPerlOutput(ChatbotRequestBean requestBean) {
 
-		ChatbotResponseBean responseBean = new ChatbotResponseBean();
 		BufferedReader reader;
-		StringBuffer sb = new StringBuffer();
-		try {
+		StringBuilder sb = new StringBuilder();
 
-			String command = "cmd /c C:\\Strawberry\\perl\\bin\\perl C:\\Users\\praveen.rawat\\eclipse-workspace\\TestCommand\\src\\com\\hello\\mainPL.pl"
-					+ " " + requestBean.getInput1() + " " + requestBean.getInput2();
-			Process process = Runtime.getRuntime().exec(command);
+		StringBuilder callerIntentParsed = new StringBuilder();
+
+		try {
+			String command = "/usr/local/Nuance/ChatbotScript/GetIntent.sh";
+			ProcessBuilder pb = new ProcessBuilder(command, requestBean.getInputText());
+			Process process = pb.start();
 			process.waitFor();
 			if (process.exitValue() == 0) {
 				logger.info("Executed Successfully!!!");
+				reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					sb.append(line);
+				}
+				reader.close();
+				callerIntentParsed.append("<?xml version=");
+				callerIntentParsed.append(substringBetween(sb.toString(), "<?xml version=", "</result>"));
+				callerIntentParsed.append("</result>");
+
 			} else {
+				callerIntentParsed.append("Error executing the script for the input: " + requestBean.getInputText());
 				logger.error("Error executing the perl script!!");
 			}
 
-			reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				sb.append(line);
-			}
-			reader.close();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
-		responseBean.setCallerIntent(sb.toString());
-		return responseBean;
+		return callerIntentParsed.toString();
+	}
+
+	public static String getSystemTime() {
+		DateFormat df = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+		Date date = new Date();
+		return df.format(date);
 	}
 }

@@ -1,5 +1,8 @@
 package com.nuance.chatbot.controller;
 
+import static com.nuance.chatbot.utils.AppUtils.getPerlOutput;
+import static com.nuance.chatbot.utils.AppUtils.getSystemTime;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,7 +16,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.nuance.chatbot.databeans.ChatbotRequestBean;
 import com.nuance.chatbot.databeans.ChatbotResponseBean;
-import com.nuance.chatbot.utils.AppUtils;
 
 /**
  * Handles requests for the Chatbot service.
@@ -23,10 +25,13 @@ public class ChatbotController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ChatbotController.class);
 
-	@RequestMapping("/greeting")
+	@RequestMapping("/getIntent")
 	public @ResponseBody ChatbotResponseBean getIntent(ChatbotRequestBean requestBean) {
-		logger.info("Recieved reqeusts: " + requestBean.getInput1() + ", " + requestBean.getInput2());
-		return AppUtils.getPerlOutput(requestBean);
+		logger.info(getSystemTime() + " Recieved reqeusts for input : " + requestBean.getInputText());
+		ChatbotResponseBean responseBean = new ChatbotResponseBean();
+		responseBean.setCallerIntent(getPerlOutput(requestBean));
+		logger.info(getSystemTime() + " Returning response for : " + responseBean.getCallerIntent());
+		return responseBean;
 	}
 
 	@RequestMapping(value = "/home", method = RequestMethod.GET)
