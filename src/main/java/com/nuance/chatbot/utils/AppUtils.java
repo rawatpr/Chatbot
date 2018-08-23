@@ -38,7 +38,7 @@ public class AppUtils {
 
 		try {
 			String command = "/usr/local/Nuance/ChatbotScript/GetIntent.sh";
-			ProcessBuilder pb = new ProcessBuilder(command, requestBean.getInputText());
+			ProcessBuilder pb = new ProcessBuilder(command, requestBean.getInputText(), requestBean.getGramFile());
 			Process process = pb.start();
 			process.waitFor();
 			if (process.exitValue() == 0) {
@@ -54,7 +54,8 @@ public class AppUtils {
 				callerIntentParsed.append("</result>");
 
 			} else {
-				callerIntentParsed.append("Error executing the script for the input: " + requestBean.getInputText());
+				callerIntentParsed.append("Error executing the script for the input: " + requestBean.getInputText()
+						+ ", and Gram File: " + requestBean.getGramFile());
 				logger.error("Error executing the perl script!!");
 			}
 

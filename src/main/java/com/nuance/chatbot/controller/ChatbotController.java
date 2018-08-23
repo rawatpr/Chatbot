@@ -27,7 +27,7 @@ public class ChatbotController {
 
 	@RequestMapping("/getIntent")
 	public @ResponseBody ChatbotResponseBean getIntent(ChatbotRequestBean requestBean) {
-		logger.info(getSystemTime() + " Recieved reqeusts for input : " + requestBean.getInputText());
+		logger.info(getSystemTime() + " Recieved reqeusts for inputText : " + requestBean.getInputText()+", and GrammarFile: "+requestBean.getGramFile());
 		ChatbotResponseBean responseBean = new ChatbotResponseBean();
 		responseBean.setCallerIntent(getPerlOutput(requestBean));
 		logger.info(getSystemTime() + " Returning response for : " + responseBean.getCallerIntent());
